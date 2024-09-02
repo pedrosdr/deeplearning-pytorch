@@ -1,0 +1,6 @@
+# Large Files
+*.csv
+*.json
+
+# Python
+venv
