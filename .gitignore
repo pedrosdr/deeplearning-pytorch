@@ -1,4 +1,5 @@
 # Large Files
+data/*
 *.csv
 *.json
 
