@@ -8,6 +8,7 @@ from sklearn.metrics import accuracy_score
 import seaborn as sns
 import matplotlib.pyplot as plt
 from skorch import NeuralNetBinaryClassifier
+from sklearn.model_selection import KFold, cross_val_score
 
 np.random.seed(123)
 torch.manual_seed(123)
@@ -68,6 +69,9 @@ for epoch in range(100):
 
 # Viewing the weights
 params = list(net.parameters())
+print(net.fc1.weight is params[0])
+print(net.fc1.bias is params[1])
+
 for param in params:
     print(param.shape)
     sns.histplot(param.detach().numpy().flatten())
@@ -80,3 +84,21 @@ ypred = torch.tensor([1 if x > 0.5 else 0 for x in net(xtest)], dtype=torch.int3
 ypred = ypred.unsqueeze(-1)
 
 print(accuracy_score(ytest, ypred))
+
+# Sktorch
+sk_net = NeuralNetBinaryClassifier(
+    module=net,
+    optimizer=torch.optim.Adam,
+    lr=0.001,
+    optimizer__weight_decay=0.0001,
+    max_epochs=500,
+    batch_size=100,
+    train_split=False
+)
+
+# Cross Validation
+kf = KFold(n_splits=10, shuffle=True)
+x = torch.concat([xtrain, xtest], dim=0)
+y = torch.concat([ytrain, ytest], dim=0).squeeze()
+cv_results = cross_val_score(sk_net, x, y, cv = kf, scoring='accuracy')
+sns.histplot(cv_results, bins=7)
