@@ -33,9 +33,11 @@ class Net(nn.Module):
     def forward(self, x):
         x = self.fc1(x)
         x = f.relu(x)
+        x = f.dropout(x, 0.2)
         
         x = self.fc2(x)
         x = f.relu(x)
+        x = f.dropout(x, 0.2)
         
         x = self.fc3(x)
         x = f.sigmoid(x)
