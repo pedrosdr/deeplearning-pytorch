@@ -5,6 +5,9 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+import seaborn as sns
+import matplotlib.pyplot as plt
+from skorch import NeuralNetBinaryClassifier
 
 np.random.seed(123)
 torch.manual_seed(123)
@@ -43,7 +46,7 @@ criterion = nn.BCELoss()
 optimizer = torch.optim.Adam(net.parameters(), 0.001, weight_decay=0.0001)
 
 
-for epoch in range(1000):
+for epoch in range(100):
     running_loss = 0.0
     for data in train_loader:
         inputs, labels = data
@@ -62,6 +65,17 @@ for epoch in range(1000):
     running_loss /= len(train_loader)
     print(running_loss)
 
+
+# Viewing the weights
+params = list(net.parameters())
+for param in params:
+    print(param.shape)
+    sns.histplot(param.detach().numpy().flatten())
+    plt.show()
+    plt.close()
+    
+
+# Avaliação do modelo
 ypred = torch.tensor([1 if x > 0.5 else 0 for x in net(xtest)], dtype=torch.int32)
 ypred = ypred.unsqueeze(-1)
 
