@@ -91,3 +91,38 @@ ytrue = y.detach()
 accuracy_score(ytrue, ypred)
         
 torch.save(model.state_dict(), 'binary_classifier.pth')
+
+# Loading the classifier
+x = torch.tensor(pd.read_csv('../data/entradas_breast.csv').to_numpy(), dtype=torch.float32)
+y = torch.tensor(pd.read_csv('../data/saidas_breast.csv').to_numpy(), dtype=torch.float32)
+
+class Net(nn.Module):
+    def __init__(self, activation, neurons):
+        super(Net, self).__init__()
+        self.activation = activation
+        
+        self.fc1 = nn.Linear(30, neurons)
+        self.fc2 = nn.Linear(neurons, neurons)
+        self.fc3 = nn.Linear(neurons, 1)
+    
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.activation(x)
+        x = f.dropout(x, 0.2)
+        
+        x = self.fc2(x)
+        x = self.activation(x)
+        x = f.dropout(x, 0.2)
+        
+        x = self.fc3(x)
+        x = f.sigmoid(x)
+        
+        return x
+    
+model = Net(f.sigmoid, 100)
+model.load_state_dict(torch.load('binary_classifier.pth'))
+
+ypred = model(x).detach()
+ypred = [1 if _ > 0.5 else 0 for _ in ypred.flatten()]
+ytrue = y.detach()
+accuracy_score(ytrue, ypred)
