@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import seaborn as sns
 import matplotlib.pyplot as plt
-from skorch import NeuralNetBinaryClassifier
+from skorch import NeuralNetClassifier
 from sklearn.model_selection import KFold, cross_val_score
 
 base = pd.read_csv('../data/iris.csv')
@@ -24,9 +24,9 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         
-        self.dense1 = nn.Linear(4, 16)
-        self.dense2 = nn.Linear(16, 16)
-        self.dense3 = nn.Linear(16, 3)
+        self.dense1 = nn.Linear(4, 50)
+        self.dense2 = nn.Linear(50, 50)
+        self.dense3 = nn.Linear(50, 3)
     
     def forward(self, x):
         x = self.dense1(x)
@@ -63,3 +63,17 @@ ypred = net(xtest).detach()
 ypred = np.array([_.argmax() for _ in ypred])
 ytrue = np.array([_.argmax() for _ in ytest])
 accuracy_score(ytrue, ypred)
+
+
+# coss_validation
+sk_net = NeuralNetClassifier(
+    module=net,
+    optimizer=torch.optim.Adam,
+    criterion=nn.CrossEntropyLoss,
+    batch_size=100,
+    max_epochs=500
+)
+
+results_cv = cross_val_score(sk_net, x, y.argmax(dim=1), cv=10, scoring='accuracy')
+sns.histplot(results_cv)
+
