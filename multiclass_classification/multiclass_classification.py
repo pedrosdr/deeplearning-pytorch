@@ -75,5 +75,5 @@ sk_net = NeuralNetClassifier(
 )
 
 results_cv = cross_val_score(sk_net, x, y.argmax(dim=1), cv=10, scoring='accuracy')
-sns.histplot(results_cv)
+sns.histplot(results_cv, bins=5)
 
