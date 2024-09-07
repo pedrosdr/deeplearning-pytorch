@@ -7,8 +7,9 @@ from torchvision import datasets
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
+from time import time
 
-device = torch.device('cuda:0')
+device = torch.device('cuda')
 
 transform = transforms.ToTensor()
 train = datasets.MNIST(root='.', train=True, download=True, transform=transform)
@@ -56,6 +57,7 @@ net = net.to(device)
 optimizer = torch.optim.Adam(net.parameters(), lr=0.001, weight_decay=0.0001)
 criterion = nn.CrossEntropyLoss()
 
+start = time()
 for epoch in range(10):
     losses = []
     for inputs, targets in dataloader_train:
@@ -71,6 +73,8 @@ for epoch in range(10):
         losses.append(loss.item())
     losses = np.array(losses)
     print(f'{losses.mean():.4f}')
+end = time()
+print('time:', end - start)
 
 y_true = [_[1] for _ in test]
 xtest = torch.tensor(np.array([_[0] for _ in test]), dtype=torch.float32)
