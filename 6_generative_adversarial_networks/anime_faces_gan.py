@@ -132,5 +132,5 @@ for i in range(5):
     img.save(f'images/generated/img{i}.png')
 
 # Saving the models
-torch.save(gen, 'anime_faces_generator.pth')
-torch.save(disc, 'anime_faces_discriminator.pth')
+torch.save(gen.state_dict, 'anime_faces_generator.pth')
+torch.save(disc.state_dict, 'anime_faces_discriminator.pth')
