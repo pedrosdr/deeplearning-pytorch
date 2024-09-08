@@ -5,3 +5,6 @@ data/*
 
 # Python
 venv
+
+# Torch
+*.pth
