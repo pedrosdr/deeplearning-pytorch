@@ -13,20 +13,32 @@ cpu = torch.device('cpu')
 
 files = np.array(['../data/daisy/'+_ for _ in os.listdir('../data/daisy')])
 
-images = np.array([np.array(Image.open(_).resize((64,64))) for _ in files])
+images = np.array([np.array(Image.open(_).resize((64, 64))) for _ in files])
 del files
+
+# fig, axes = plt.subplots(2, 4, figsize=(50, 50))
+# for i, ax in enumerate(axes.flat):
+#     ax.imshow(images[i])
+#     ax.axis('off') 
+# plt.subplots_adjust(wspace=0.03, hspace=-0.1) 
 
 images = torch.tensor(images, dtype=torch.float32)
 images = images.permute(0,3,1,2)
 images = images / 255.0
-images = images[:,:3,:,:]
 
 transforms = v2.Compose([
     v2.RandomResizedCrop(size=(64, 64), antialias=True),
-    v2.RandomRotation(45),
+    v2.RandomRotation(10),
     v2.RandomHorizontalFlip(p=0.5)
 ])
 images = torch.concatenate([images, transforms(images), transforms(images), transforms(images)])
+
+# fig, axes = plt.subplots(2, 4, figsize=(50, 50))
+# for i, ax in enumerate(axes.flat):
+#     a = transforms(images).detach().numpy().transpose(0,2,3,1)
+#     ax.imshow(a[i])
+#     ax.axis('off') 
+# plt.subplots_adjust(wspace=0.03, hspace=-0.1) 
 
 dataset = torch.utils.data.TensorDataset(images)
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True)
@@ -82,26 +94,30 @@ class Discriminator(nn.Module):
         self.conv4 = nn.Conv2d(128, 128, 3, 1, 'same')
         self.bnorm4 = nn.BatchNorm2d(128)
         
-        self.conv5 = nn.Conv2d(128, 128, 3, 1, 'same')
-        self.bnorm5 = nn.BatchNorm2d(128)
-        
         self.dense1 = nn.Linear(6272, 3136)
         self.dense2 = nn.Linear(3136, 1)
     
     def forward(self, x):
+        print(x.shape)
         x = f.dropout(self.bnorm1(f.leaky_relu(self.conv1(x), 0.2)), 0.2)
+        print(x.shape)
         x = f.dropout(self.bnorm2(f.leaky_relu(self.conv2(x), 0.2)), 0.2)
+        print(x.shape)
         x = f.dropout(self.bnorm3(f.leaky_relu(self.conv3(x), 0.2)), 0.2)
+        print(x.shape)
         x = f.dropout(self.bnorm4(f.leaky_relu(self.conv4(x), 0.2)), 0.2)
-        x = f.dropout(self.bnorm5(f.leaky_relu(self.conv5(x), 0.2)), 0.2)
+        print(x.shape)
 
         x = x.view(-1, 6272)
         x = f.dropout(f.relu(self.dense1(x)), 0.2)
+        print(x.shape)
         x = f.sigmoid(self.dense2(x))
+        print(x.shape)
         return x
 
 gen = Generator().to(device)
 disc = Discriminator().to(device)
+disc(images[0:1].to(device))
 
 disc(torch.rand([1,3,64,64], dtype=torch.float32, device=device)).shape
 
@@ -154,3 +170,10 @@ for i in range(5):
 # Saving the models
 torch.save(gen.state_dict, 'daisy_generator.pth')
 torch.save(disc.state_dict, 'daisy_discriminator.pth')
+
+# Loading the model
+state_dict_gen = torch.load('daisy_generator.pth', weights_only=False)
+
+gen = Generator()
+gen.load_state_dict(state_dict_gen())
+gen = gen.to(device)
