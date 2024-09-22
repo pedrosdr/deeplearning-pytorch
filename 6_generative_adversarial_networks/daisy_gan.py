@@ -59,9 +59,6 @@ class Generator(nn.Module):
         self.convt3 = nn.ConvTranspose2d(64, 32, 3, 1, 1)
         self.bnorm3 = nn.BatchNorm2d(32)
         
-        self.convt6 = nn.ConvTranspose2d(32, 32, 3, 1, 1)
-        self.bnorm6 = nn.BatchNorm2d(32)
-        
         self.convt4 = nn.ConvTranspose2d(32, 16, 4, 2, 1)
         self.bnorm4 = nn.BatchNorm2d(16)
         
@@ -94,25 +91,22 @@ class Discriminator(nn.Module):
         self.conv4 = nn.Conv2d(128, 128, 3, 1, 'same')
         self.bnorm4 = nn.BatchNorm2d(128)
         
+        self.conv5 = nn.Conv2d(128, 128, 3, 1, 'same')
+        self.bnorm5 = nn.BatchNorm2d(128)
+        
         self.dense1 = nn.Linear(6272, 3136)
         self.dense2 = nn.Linear(3136, 1)
     
     def forward(self, x):
-        print(x.shape)
         x = f.dropout(self.bnorm1(f.leaky_relu(self.conv1(x), 0.2)), 0.2)
-        print(x.shape)
         x = f.dropout(self.bnorm2(f.leaky_relu(self.conv2(x), 0.2)), 0.2)
-        print(x.shape)
         x = f.dropout(self.bnorm3(f.leaky_relu(self.conv3(x), 0.2)), 0.2)
-        print(x.shape)
         x = f.dropout(self.bnorm4(f.leaky_relu(self.conv4(x), 0.2)), 0.2)
-        print(x.shape)
+        x = f.dropout(self.bnorm5(f.leaky_relu(self.conv5(x), 0.2)), 0.2)
 
         x = x.view(-1, 6272)
         x = f.dropout(f.relu(self.dense1(x)), 0.2)
-        print(x.shape)
         x = f.sigmoid(self.dense2(x))
-        print(x.shape)
         return x
 
 gen = Generator().to(device)
@@ -126,7 +120,7 @@ optim2 = torch.optim.RMSprop(disc.parameters(), lr=0.001, weight_decay=0.0001)
 
 criterion = nn.BCELoss()
 
-for i in range(1000):
+for i in range(400):
     for [inputs] in dataloader:
         inputs = inputs.to(device)
         
