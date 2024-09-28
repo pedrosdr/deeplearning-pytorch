@@ -120,7 +120,7 @@ optim2 = torch.optim.RMSprop(disc.parameters(), lr=0.001, weight_decay=0.0001)
 
 criterion = nn.BCELoss()
 
-for i in range(400):
+for i in range(2000):
     for [inputs] in dataloader:
         inputs = inputs.to(device)
         
@@ -161,13 +161,25 @@ for i in range(5):
     img = Image.fromarray(img)
     img
 
+generated_images = gen(torch.randn([8, 100], dtype=torch.float32, device=device))
+generated_images = generated_images.to(cpu)
+fig, axes = plt.subplots(2, 4, figsize=(50, 50))
+for i, ax in enumerate(axes.flat):
+    ax.imshow(generated_images.detach().permute(0,2,3,1).numpy()[i])
+    ax.axis('off') 
+
 # Saving the models
 torch.save(gen.state_dict, 'daisy_generator.pth')
 torch.save(disc.state_dict, 'daisy_discriminator.pth')
 
 # Loading the model
 state_dict_gen = torch.load('daisy_generator.pth', weights_only=False)
+state_dict_disc = torch.load('daisy_discriminator.pth', weights_only=False)
 
 gen = Generator()
 gen.load_state_dict(state_dict_gen())
 gen = gen.to(device)
+
+disc = Discriminator()
+disc.load_state_dict(state_dict_disc())
+disc = disc.to(device)
