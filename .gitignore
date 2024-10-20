@@ -8,3 +8,6 @@ venv
 
 # Torch
 *.pth
+
+# Images
+**/Images/*

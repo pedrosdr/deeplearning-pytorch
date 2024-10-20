@@ -183,3 +183,4 @@ gen = gen.to(device)
 disc = Discriminator()
 disc.load_state_dict(state_dict_disc())
 disc = disc.to(device)
+
