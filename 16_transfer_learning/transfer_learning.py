@@ -29,4 +29,14 @@ directories_to_remove = [x for x in directories_info[
 
 [shutil.rmtree('Images/' + directory) for directory in directories_to_remove]
 
-[os.listdir('Images/' + i) for i in directories_filtered['directory']]
+numfiles_per_folder = [len(files) for root, dirs, files in os.walk('Images') if len(files) > 0]
+filenames = [os.listdir('Images/' + i) for i in directories_filtered['directory']]
+
+np.random.choice(filenames[0], 30, replace=False)
+np.random.seed(23)
+files_to_test = [sorted(np.random.choice(files, round(600 * 0.2), replace=False)) 
+                 for files, num_files in zip(
+                             filenames, numfiles_per_folder
+                         )]
+
+files_to_test[0]
