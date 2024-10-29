@@ -62,7 +62,7 @@ from sklearn.model_selection import train_test_split
 import torch
 import torch.nn as nn
 import torch.nn.functional as f
-from torchvision import datasets
+from torchvision import datasets, models
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 
@@ -94,9 +94,18 @@ test_loader = torch.utils.data.DataLoader(
     shuffle=True
 )
 
+# Loading the model VGG 16
+model = models.vgg16(weights=models.VGG16_Weights.DEFAULT)
+print(model)
 
+# Switching the output layer
+n_inputs = model.classifier[6].in_features
+classification_layer = nn.Linear(n_inputs, len(train_dataset.classes))
+model.classifier[6] = classification_layer
 
-
+# freezing the weights of the convolutional layers 
+for param in model.features.parameters():
+    param.requires_grad = False
 
 
 
