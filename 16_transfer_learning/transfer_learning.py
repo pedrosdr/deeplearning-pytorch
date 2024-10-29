@@ -98,7 +98,7 @@ test_loader = torch.utils.data.DataLoader(
 model = models.vgg16(weights=models.VGG16_Weights.DEFAULT)
 print(model)
 
-# Switching the output layer
+# Replacing the output layer
 n_inputs = model.classifier[6].in_features
 classification_layer = nn.Linear(n_inputs, len(train_dataset.classes))
 model.classifier[6] = classification_layer
