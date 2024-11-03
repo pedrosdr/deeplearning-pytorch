@@ -107,10 +107,43 @@ model.classifier[6] = classification_layer
 for param in model.features.parameters():
     param.requires_grad = False
 
+criterion = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(params=model.parameters())
 
+model = model.to(device)
+running_loss = 0
+running_accuracy = 0
+for epoch in range(10):
+    for i, (inputs, targets) in enumerate(train_loader):
+        inputs, targets = inputs.to(device), targets.to(device)
+        optimizer.zero_grad()
+        
+        outputs = model(inputs)
+        loss = criterion(outputs, targets)
+        loss.backward()
+        optimizer.step()
+        
+        y_pred = torch.argmax(f.softmax(outputs, dim=1), dim=1)
+        equals = (y_pred == targets).float()
+        accuracy = equals.mean()
+        
+        running_loss += loss.item()
+        running_accuracy += accuracy
+        
+        print(f'epoch: {epoch+1}, step {i}/{len(train_loader)}, accuracy: {accuracy}, loss: {loss.item()}')
+        
+# Testing
+images, labels = next(iter(test_loader))
+images = images.to(device)
+labels = labels.to(device)
 
+outputs = model(images)
+y_pred = torch.argmax(f.softmax(outputs, dim=1), dim=1)
+equals = (y_pred == labels).float()
+accuracy = equals.mean()
+print(accuracy)
 
-
-
-
-
+idx_to_class = {v: k for k, v in test_dataset.class_to_idx.items()}
+labels, y_pred = labels.to(cpu).detach().numpy(), y_pred.to(cpu).detach().numpy()
+labels = [idx_to_class[label] for label in labels]
+y_pred = [idx_to_class[prediction] for prediction in y_pred]
