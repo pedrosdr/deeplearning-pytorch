@@ -5,6 +5,7 @@ import torch
 import torch.optim as optim 
 import torch.nn.functional as f
 from torchvision import transforms, models
+from datetime import datetime
 
 torch.manual_seed(71)
 
@@ -72,3 +73,33 @@ def gram_matrix(tensor):
 style_img_grams = {
     layer: gram_matrix(feature) for layer, feature in features_style_img.items()
 }
+
+style_weights = {
+    0: 1.,
+    5: 0.8,
+    10: 0.6,
+    19: 0.4,
+    28: 0.2
+}
+
+content_weight = 1
+style_weight = 1e6
+
+target_img = new_img.clone().requires_grad_(True).to(device)
+
+optimizer = optim.Adam([target_img], lr=0.002)
+
+# Training
+epochs = 3000
+print_every = 500
+
+start = datetime.now()
+for epoch in range(epochs):
+    features_target_img = extract_features(target_img)
+    
+    # content loss
+    target_img_content_features = features_target_img[28]
+    new_img_content_features = features_new_img[28]
+    
+    content_loss = f.mse_loss(target_img_content_features, new_img_content_features)
+    print(content_loss.item())
